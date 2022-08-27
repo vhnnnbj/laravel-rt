@@ -4,12 +4,12 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "zhangzibin",
-            "email": "619146134@qq.com"
+            "name": "vhnnnbj",
+            "email": "harden.csf@gmail.com"
         }
     ],
     "require": {
-        "php": "^7.1"
+        "php": "^7.1|^8.0"
     },
     "autoload": {
         "psr-4": {
