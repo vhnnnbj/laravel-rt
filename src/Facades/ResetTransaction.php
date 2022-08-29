@@ -265,7 +265,8 @@ class ResetTransaction
                     }
                 }
 
-                $connectionName = DB::connection()->getConfig('connection_name');
+                $connectionName = DB::connection()->getConfig('host') . ':' .
+                    DB::connection()->getConfig('database');
                 $sqlItem = [
                     'transact_id' => $rtTransactId,
                     'sql' => $backupSql,
