@@ -46,7 +46,7 @@ class TransactionCenter
         foreach ($xidMap as $name => $item) {
             $sqlCollects = $item['sql_list'];
             foreach ($sqlCollects as $item) {
-                $result = DB::connection($name)->getPdo()->exec($item->sql);
+                $result = DB::connection($name)->getPdo()->exec(str_replace('\\', '\\\\', $item->sql));
                 if ($item->check_result && $result != $item->result) {
                     throw new RtException("db had been changed by anothor transact_id");
                 }
