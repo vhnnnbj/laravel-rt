@@ -101,7 +101,7 @@ class ResetOrderController extends Controller
      */
     public function createWithTimeout(Request $request)
     {
-        $requestId = $request->header('rt_request_id');
+        $requestId = $request->header('rt-request-id');
         $cache = Cache::store('file');
         $cache->increment($requestId);
         $times = $cache->get($requestId);
@@ -145,8 +145,8 @@ class ResetOrderController extends Controller
             $client->put('/api/resetOrderTest/updateOrCreate/'.$id, [
                 'json' =>['order_no' => session_create_id()],
                 'headers' => [
-                    'rt_request_id' => session_create_id(),
-                    'rt_transact_id' => $transactId,
+                    'rt-request-id' => session_create_id(),
+                    'rt-transact-id' => $transactId,
                     
                 ]
             ]);

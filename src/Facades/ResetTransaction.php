@@ -179,7 +179,7 @@ class ResetTransaction
     public function logRT($status)
     {
         $sqlArr = session()->get('rt_transact_sql');
-        $requestId = session()->get('rt_request_id');
+        $requestId = session()->get('rt-request-id');
         if (is_null($requestId)) {
             $requestId = $this->transactIdArr[0];
         }
@@ -205,7 +205,7 @@ class ResetTransaction
         $this->transactIdArr = [];
 
         session()->remove('rt_transact_sql');
-        session()->remove('rt_request_id');
+        session()->remove('rt-request-id');
     }
 
     public function saveQuery($query, $bindings, $result, $checkResult, $keyName = null, $id = null)

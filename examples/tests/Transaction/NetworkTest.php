@@ -32,7 +32,7 @@ class NetworkTest extends TestCase
         
         DB::setDefaultConnection('service_order');
         $requestId = session_create_id();
-        session()->put('rt_request_id', $requestId);
+        session()->put('rt-request-id', $requestId);
 
         $stack = HandlerStack::create();
         $stack->push(Middleware::retry(function ($retries, Request $request, Response $response, $exception) {
@@ -82,8 +82,8 @@ class NetworkTest extends TestCase
                 'amount' => $amount
             ],
             'headers' => [
-                'rt_request_id' => $requestId,
-                'rt_transact_id' => $transactId,
+                'rt-request-id' => $requestId,
+                'rt-transact-id' => $transactId,
                 
             ],
         ]);
@@ -117,8 +117,8 @@ class NetworkTest extends TestCase
                 'amount' => $amount
             ],
             'headers' => [
-                'rt_request_id' => $requestId,
-                'rt_transact_id' => $transactId,
+                'rt-request-id' => $requestId,
+                'rt-transact-id' => $transactId,
                 
             ],
         ]);
@@ -132,8 +132,8 @@ class NetworkTest extends TestCase
                 'amount' => $amount
             ],
             'headers' => [
-                'rt_request_id' => $requestId,
-                'rt_transact_id' => $transactId,
+                'rt-request-id' => $requestId,
+                'rt-transact-id' => $transactId,
                 
             ]
         ]);

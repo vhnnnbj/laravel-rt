@@ -34,7 +34,7 @@ class ServiceTest extends TestCase
         ]);
 
         $requestId = session_create_id();
-        session()->put('rt_request_id', $requestId);
+        session()->put('rt-request-id', $requestId);
     }
 
     public function testCreateOrderWithRollback()
@@ -61,8 +61,8 @@ class ServiceTest extends TestCase
                 'decr_stock_qty' => $stockQty
             ],
             'headers' => [
-                'rt_request_id' => $requestId,
-                'rt_transact_id' => $transactId,
+                'rt-request-id' => $requestId,
+                'rt-transact-id' => $transactId,
                             ]
         ]);
         $resArr1 = $this->responseToArray($response);
@@ -75,8 +75,8 @@ class ServiceTest extends TestCase
                 'decr_amount' => $amount
             ],
             'headers' => [
-                'rt_request_id' => $requestId,
-                'rt_transact_id' => $transactId,
+                'rt-request-id' => $requestId,
+                'rt-transact-id' => $transactId,
                 
             ]
         ]);
@@ -118,8 +118,8 @@ class ServiceTest extends TestCase
                 'decr_stock_qty' => $stockQty
             ],
             'headers' => [
-                'rt_request_id' => $requestId,
-                'rt_transact_id' => $transactId,
+                'rt-request-id' => $requestId,
+                'rt-transact-id' => $transactId,
                             ]
         ]);
         $resArr1 = $this->responseToArray($response);
@@ -132,8 +132,8 @@ class ServiceTest extends TestCase
                 'decr_amount' => $amount
             ],
             'headers' => [
-                'rt_request_id' => $requestId,
-                'rt_transact_id' => $transactId,
+                'rt-request-id' => $requestId,
+                'rt-transact-id' => $transactId,
                 
             ]
         ]);
@@ -172,8 +172,8 @@ class ServiceTest extends TestCase
                 'status' => $status,
             ],
             'headers' => [
-                'rt_request_id' => session_create_id(),
-                'rt_transact_id' => $txId,
+                'rt-request-id' => session_create_id(),
+                'rt-transact-id' => $txId,
                 
             ]
         ]);
@@ -184,8 +184,8 @@ class ServiceTest extends TestCase
                     'status' => $status,
                 ],
                 'headers' => [
-                    'rt_request_id' => session_create_id(),
-                    'rt_transact_id' => $txId2,
+                    'rt-request-id' => session_create_id(),
+                    'rt-transact-id' => $txId2,
                     
                 ]
             ]);
@@ -197,8 +197,8 @@ class ServiceTest extends TestCase
                         'status' => $status,
                     ],
                     'headers' => [
-                        'rt_request_id' => session_create_id(),
-                        'rt_transact_id' => $txId3,
+                        'rt-request-id' => session_create_id(),
+                        'rt-transact-id' => $txId3,
                         
                     ]
                 ]);
@@ -208,8 +208,8 @@ class ServiceTest extends TestCase
                         'status' => $status,
                     ],
                     'headers' => [
-                        'rt_request_id' => session_create_id(),
-                        'rt_transact_id' => $txId3,
+                        'rt-request-id' => session_create_id(),
+                        'rt-transact-id' => $txId3,
                         
                     ]
                 ]);

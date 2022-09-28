@@ -109,8 +109,8 @@ class ResetAccountController extends Controller
                 'amount' => $amount
             ],
             'headers' => [
-                'rt_request_id' => session_create_id(),
-                'rt_transact_id' => $transactId,
+                'rt-request-id' => session_create_id(),
+                'rt-transact-id' => $transactId,
             ]
         ]);
 
@@ -119,8 +119,8 @@ class ResetAccountController extends Controller
                 'decr_stock_qty' => $stockQty
             ],
             'headers' => [
-                'rt_request_id' => session_create_id(),
-                'rt_transact_id' => $transactId,
+                'rt-request-id' => session_create_id(),
+                'rt-transact-id' => $transactId,
             ]
         ]);
 
@@ -157,8 +157,8 @@ class ResetAccountController extends Controller
                 'amount' => $amount
             ],
             'headers' => [
-                'rt_request_id' => session_create_id(),
-                'rt_transact_id' => $transactId,
+                'rt-request-id' => session_create_id(),
+                'rt-transact-id' => $transactId,
                 
             ]
         ]);
@@ -168,8 +168,8 @@ class ResetAccountController extends Controller
                 'decr_stock_qty' => $stockQty
             ],
             'headers' => [
-                'rt_request_id' => session_create_id(),
-                'rt_transact_id' => $transactId,
+                'rt-request-id' => session_create_id(),
+                'rt-transact-id' => $transactId,
                             ]
         ]);
 

@@ -32,7 +32,7 @@ class SubNestTest extends TestCase
 
         DB::setDefaultConnection('service_order');
         $requestId = session_create_id();
-        session()->put('rt_request_id', $requestId);
+        session()->put('rt-request-id', $requestId);
 
         $this->client = new Client([
             'base_uri' => $this->baseUri,
@@ -53,8 +53,8 @@ class SubNestTest extends TestCase
         // 请求账户服务，减金额
         $response = $this->client->post('/api/resetAccountTest/createOrdersRollback', [
             'headers' => [
-                'rt_request_id' => session_create_id(),
-                'rt_transact_id' => $transactId,
+                'rt-request-id' => session_create_id(),
+                'rt-transact-id' => $transactId,
                 
             ]
         ]);
@@ -72,8 +72,8 @@ class SubNestTest extends TestCase
         // 请求账户服务，减金额
         $response = $this->client->post('/api/resetAccountTest/createOrdersCommit', [
             'headers' => [
-                'rt_request_id' => session_create_id(),
-                'rt_transact_id' => $transactId,
+                'rt-request-id' => session_create_id(),
+                'rt-transact-id' => $transactId,
                 
             ]
         ]);

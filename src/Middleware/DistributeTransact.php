@@ -20,14 +20,14 @@ class DistributeTransact
      */
     public function handle($request, Closure $next)
     {
-        $requestId = $request->header('rt_request_id');
-        $transactId = $request->header('rt_transact_id');
+        $requestId = $request->header('rt-request-id');
+        $transactId = $request->header('rt-transact-id');
         
         if ($transactId) {
             if (!$requestId) {
                 throw new RtException('rt_request_id cannot be null');
             }
-            session()->put('rt_request_id', $requestId);
+            session()->put('rt-request-id', $requestId);
             $item = DB::connection('rt_center')->table('reset_transact_req')->where('request_id', $requestId)->first();
             if ($item) {
                 $data = json_decode($item->response, true);
@@ -39,8 +39,8 @@ class DistributeTransact
 
         $response = $next($request);
 
-        $requestId = $request->header('rt_request_id');
-        $transactId = $request->header('rt_transact_id');
+        $requestId = $request->header('rt-request-id');
+        $transactId = $request->header('rt-transact-id');
         $transactIdArr = explode('-', $transactId);
         if ($transactId && $response->isSuccessful()) {
             RT::middlewareRollback();
