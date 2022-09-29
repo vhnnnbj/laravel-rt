@@ -4,6 +4,7 @@ namespace Laravel\ResetTransaction\Facades;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ResetTransaction
 {
@@ -30,7 +31,11 @@ class ResetTransaction
 
     public function commit()
     {
-        $this->stmtRollback();
+        if (count($this->transactIdArr) == 1) {
+            $this->stmtRollback();
+        } else {
+            $this->stmtCommit();
+        }
 
         if (count($this->transactIdArr) > 1) {
             array_pop($this->transactIdArr);
@@ -90,7 +95,7 @@ class ResetTransaction
     public function middlewareBeginTransaction($transactId)
     {
         $transactIdArr = explode('-', $transactId);
-        $connection = DB::getDefaultConnection();
+        $connection = DB::connection()->getConfig('connection_name');
         $sqlArr = DB::connection('rt_center')
             ->table('reset_transact_sql')
             ->where('transact_id', $transactIdArr[0])
@@ -217,7 +222,21 @@ class ResetTransaction
             $actionArr = explode(' ', $subString);
             $action = $actionArr[0];
 
-            $sql = str_replace("?", "'%s'", $query);
+            if ($bindings) {
+                $values = $bindings;
+                for ($i = 0; $i < count($bindings); $i++) {
+                    if (!is_null($bindings[$i])) {
+                        $query = Str::replaceFirst('?', "'%s'", $query);
+                    } else {
+                        $query = Str::replaceFirst('?', 'null', $query);
+                        unset($values[$i]);
+                    }
+                }
+                $sql = str_replace(', ?', '', $query);
+                $bindings = $values;
+            } else {
+                $sql = str_replace("?", "'%s'", $query);
+            }
             $completeSql = vsprintf($sql, $bindings);
 
             if (in_array($action, ['insert', 'update', 'delete', 'set', 'savepoint', 'rollback'])) {
@@ -282,6 +301,13 @@ class ResetTransaction
     {
         session()->put('rt_stmt', 'begin');
         DB::beginTransaction();
+        session()->remove('rt_stmt', 'begin');
+    }
+
+    private function stmtCommit()
+    {
+        session()->put('rt_stmt', 'begin');
+        DB::commit();
         session()->remove('rt_stmt', 'begin');
     }
 
