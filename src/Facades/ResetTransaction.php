@@ -257,6 +257,9 @@ class ResetTransaction
                             $keyName = $columnItem->column_name;
 
                             if (strpos($columns, "`{$keyName}`") === false) {
+                                if ($table == 'jobs' && empty($keyName)) {
+                                    $keyName = 'id';
+                                }
                                 $columns = "`{$keyName}`, " . $columns;
                                 $lineArr = explode('(', $parameters);
                                 foreach ($lineArr as $index => $line) {
@@ -277,6 +280,9 @@ class ResetTransaction
                         $parameters = $match[3];
 
                         if (strpos($columns, "`{$keyName}`") === false) {
+                            if ($table == 'jobs' && empty($keyName)) {
+                                $keyName = 'id';
+                            }
                             $columns = "`{$keyName}`, " . $columns;
                             $parameters = "'{$id}', " . $parameters;
                         }
