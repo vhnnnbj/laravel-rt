@@ -257,7 +257,7 @@ class ResetTransaction
                             $keyName = $columnItem->column_name;
 
                             if (strpos($columns, "`{$keyName}`") === false) {
-                                if (($table == 'jobs' || $table = '`jobs`') && empty($keyName)) {
+                                if (($table == 'jobs' || $table == '`jobs`') && empty($keyName)) {
                                     $keyName = 'id';
                                 }
                                 $columns = "`{$keyName}`, " . $columns;
@@ -280,7 +280,7 @@ class ResetTransaction
                         $parameters = $match[3];
 
                         if (strpos($columns, "`{$keyName}`") === false) {
-                            if (($table == 'jobs' || $table = '`jobs`') && empty($keyName)) {
+                            if (($table == 'jobs' || $table == '`jobs`') && empty($keyName)) {
                                 $keyName = 'id';
                             }
                             $columns = "`{$keyName}`, " . $columns;
