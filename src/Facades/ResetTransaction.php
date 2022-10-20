@@ -270,6 +270,7 @@ class ResetTransaction
                         };
                     } else {
                         // extract variables from sql
+                        $backupSql = str_replace("\r\n", " ", $backupSql);
                         preg_match("/insert into (.+) \((.+)\) values \((.+)\)/", $backupSql, $match);
                         $table = $match[1];
                         $columns = $match[2];
@@ -289,7 +290,7 @@ class ResetTransaction
                     'transact_id' => $rtTransactId,
                     'sql' => $backupSql,
                     'result' => $result,
-                    'check_result' => (int) $checkResult,
+                    'check_result' => (int)$checkResult,
                     'connection' => $connectionName
                 ];
                 session()->push('rt_transact_sql', $sqlItem);
