@@ -242,7 +242,9 @@ class ResetTransaction
             }
             $completeSql = vsprintf($sql, $bindings);
 
-            if (in_array($action, ['insert', 'update', 'delete', 'set', 'savepoint', 'rollback'])) {
+            if (in_array($action, ['insert', 'update', 'delete', 'set', 'savepoint', 'rollback']) &&
+                !in_array('`telescope_entries`', $actionArr) &&
+                !in_array('`telescope_entries_tags`', $actionArr)) {
                 $backupSql = $completeSql;
                 if ($action == 'insert') {
                     // if only queryBuilder insert or batch insert then return false
