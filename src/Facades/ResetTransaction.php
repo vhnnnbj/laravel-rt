@@ -113,7 +113,10 @@ class ResetTransaction
 
     public function middlewareRollback()
     {
-        $this->stmtRollback();
+        while (count($this->transactIdArr) > 1) {
+            $this->rollBack();
+        }
+
         $this->logRT(RT::STATUS_COMMIT);
 
         if ($this->transactRollback) {
