@@ -221,7 +221,7 @@ class ResetTransaction
         $rtTransactId = $this->getTransactId();
         $rtSkip = session()->get('rt_skip');
         if (!$rtSkip && $rtTransactId && $query && !strpos($query, 'reset_transact')) {
-            $subString = strtolower(substr(trim($query), 0, 12));
+            $subString = strtolower(substr(trim($query), 0, 40));
             $actionArr = explode(' ', $subString);
             $action = $actionArr[0];
 
