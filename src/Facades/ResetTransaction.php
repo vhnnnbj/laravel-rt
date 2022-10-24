@@ -219,7 +219,7 @@ class ResetTransaction
         $rtTransactId = $this->getTransactId();
         $rtSkip = session()->get('rt_skip');
         if (!$rtSkip && $rtTransactId && $query && !strpos($query, 'reset_transact')) {
-            $subString = strtolower(substr(trim($query), 0, 40));
+            $subString = strtolower(substr(trim($query), 0, 12));
             $actionArr = explode(' ', $subString);
             $action = $actionArr[0];
 
@@ -260,10 +260,7 @@ class ResetTransaction
                             $columnItem = DB::selectOne('select column_name as `column_name` from information_schema.columns where table_schema = ? and table_name = ? and column_key="PRI"', [$database, trim($table, '`')]);
                             $keyName = $columnItem->column_name;
 
-                            if (strpos($columns, "`{$keyName}`") === false) {
-                                if (($table == 'jobs' || $table == '`jobs`') && empty($keyName)) {
-                                    $keyName = 'id';
-                                }
+                            if (!empty($keyName) && strpos($columns, "`{$keyName}`") === false) {
                                 $columns = "`{$keyName}`, " . $columns;
                                 $lineArr = explode('(', $parameters);
                                 foreach ($lineArr as $index => $line) {
@@ -283,10 +280,7 @@ class ResetTransaction
                         $columns = $match[2];
                         $parameters = $match[3];
 
-                        if (strpos($columns, "`{$keyName}`") === false) {
-                            if (($table == 'jobs' || $table == '`jobs`') && empty($keyName)) {
-                                $keyName = 'id';
-                            }
+                        if (!empty($keyName) && strpos($columns, "`{$keyName}`") === false) {
                             $columns = "`{$keyName}`, " . $columns;
                             $parameters = "'{$id}', " . $parameters;
                         }

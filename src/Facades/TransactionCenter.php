@@ -3,6 +3,7 @@
 namespace Laravel\ResetTransaction\Facades;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Laravel\ResetTransaction\Exception\RtException;
 use Laravel\ResetTransaction\Facades\RTCenter;
 
@@ -43,14 +44,24 @@ class TransactionCenter
         }
 
         $this->xaBeginTransaction($xidArr);
-        foreach ($xidMap as $name => $item) {
-            $sqlCollects = $item['sql_list'];
-            foreach ($sqlCollects as $item) {
-                $result = DB::connection($name)->getPdo()->exec(str_replace("(``,", "(`id`,", str_replace('\\', '\\\\', $item->sql)));
-                if ($item->check_result && $result != $item->result) {
-                    throw new RtException("db had been changed by anothor transact_id");
+        try {
+            foreach ($xidMap as $name => $item) {
+                $sqlCollects = $item['sql_list'];
+                foreach ($sqlCollects as $item) {
+                    $result = DB::connection($name)->getPdo()->exec(str_replace('\\', '\\\\', $item->sql));
+                    if ($item->check_result && $result != $item->result) {
+                        throw new RtException("db had been changed by anothor transact_id");
+                    }
                 }
             }
+        } catch (RtException $e) {
+            $this->xaRollBack($xidArr);
+            Log::info('xa commit failed: ' . $e->getMessage());
+            abort(500, $e->getMessage());
+        } catch (\Exception $exception) {
+            $this->xaRollBack($xidArr);
+            Log::info('xa commit failed: ' . $exception->getMessage());
+            abort(500, $exception->getMessage());
         }
         $this->xaCommit($xidArr);
 
