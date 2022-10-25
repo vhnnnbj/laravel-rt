@@ -47,11 +47,11 @@ class DistributeTransact
         if ($transactId && $response->isSuccessful()) {
             RT::middlewareRollback();
             Redis::setex('RTCENTER:RESPONSE:' . $requestId, 5 * 60, $response->getContent());
-            DB::connection('rt_center')->table('reset_transact_req')->insert([
+            /*DB::connection('rt_center')->table('reset_transact_req')->insert([
                 'transact_id' => $transactIdArr[0],
                 'request_id' => $requestId,
                 'response' => $response->getContent(),
-            ]);
+            ]);*/
         }
 
         return $response;
