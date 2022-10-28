@@ -249,8 +249,7 @@ class ResetTransaction
                     if (is_null($id)) {
                         $id = DB::connection()->getPdo()->lastInsertId();
                         // extract variables from sql
-                        $backupSql = str_replace("\r\n", " ", $backupSql);
-                        preg_match("/insert into (.+) \((.+)\) values \((.+)\)/", $backupSql, $match);
+                        preg_match("/insert into (.+) \((.+)\) values \((.+)\)/s", $backupSql, $match);
                         $database = DB::connection()->getConfig('database');
                         $table = $match[1];
                         $columns = $match[2];
@@ -274,8 +273,7 @@ class ResetTransaction
                         };
                     } else {
                         // extract variables from sql
-                        $backupSql = str_replace("\r\n", " ", $backupSql);
-                        preg_match("/insert into (.+) \((.+)\) values \((.+)\)/", $backupSql, $match);
+                        preg_match("/insert into (.+) \((.+)\) values \((.+)\)/s", $backupSql, $match);
                         $table = $match[1];
                         $columns = $match[2];
                         $parameters = $match[3];
