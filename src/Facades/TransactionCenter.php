@@ -5,7 +5,6 @@ namespace Laravel\ResetTransaction\Facades;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Laravel\ResetTransaction\Exception\RtException;
-use Laravel\ResetTransaction\Facades\RTCenter;
 
 class TransactionCenter
 {
@@ -48,7 +47,21 @@ class TransactionCenter
             foreach ($xidMap as $name => $item) {
                 $sqlCollects = $item['sql_list'];
                 foreach ($sqlCollects as $item) {
-                    $result = DB::connection($name)->getPdo()->exec(str_replace('\\', '\\\\', $item->sql));
+                    $subString = strtolower(substr(trim($item->sql), 0, 12));
+                    $actionArr = explode(' ', $subString);
+                    $action = $actionArr[0];
+                    if (($action == 'insert' || $action == 'update' || $action == 'delete') && $item->values) {
+//                        Log::info('here commit ' . $action, [
+//                            'item' => $item,
+//                        ]);
+                        $result = DB::connection($name)->{$action}($item->sql, json_decode($item->values, true));
+                    } else {
+                        Log::info('exec:' . $item->sql, [
+                            'value' => $item->values,
+                        ]);
+                        $result = DB::connection($name)->getPdo()->exec(str_replace('\\', '\\\\', $item->sql));
+                    }
+
                     if ($item->check_result && $result != $item->result) {
                         throw new RtException("db had been changed by anothor transact_id");
                     }

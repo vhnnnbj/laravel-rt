@@ -4,6 +4,7 @@ namespace Laravel\ResetTransaction\Facades;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ResetTransaction
@@ -101,11 +102,31 @@ class ResetTransaction
             ->where('transact_id', $transactIdArr[0])
             ->where('connection', $connection)
             ->whereIn('transact_status', [RT::STATUS_START, RT::STATUS_COMMIT])
-            ->pluck('sql')->toArray();
-        $sql = implode(';', $sqlArr);
+            ->get();
+
         $this->stmtBegin();
         if ($sqlArr) {
-            DB::unprepared($sql);
+//            DB::unprepared($sql);
+            foreach ($sqlArr as $item) {
+                $subString = strtolower(substr(trim($item->sql), 0, 12));
+                $actionArr = explode(' ', $subString);
+                $action = $actionArr[0];
+                if (($action == 'insert' || $action == 'update' || $action = 'delete') && $item->values) {
+//                    Log::info('here commit insert', [
+//                        'item' => $item,
+//                    ]);
+                    $result = DB::connection()->{$action}($item->sql, json_decode($item->values, true));
+                } else {
+//                    Log::info('exec:' . $item->sql, [
+//                        'value' => $item->values,
+//                    ]);
+                    $result = DB::connection()->getPdo()->exec(str_replace('\\', '\\\\', $item->sql));
+                }
+
+                if ($item->check_result && $result != $item->result) {
+                    throw new RtException("db had been changed by anothor transact_id");
+                }
+            }
         }
 
         $this->setTransactId($transactId);
@@ -198,6 +219,7 @@ class ResetTransaction
                     'chain_id' => $item['transact_id'],
                     'transact_status' => $status,
                     'sql' => value($item['sql']),
+                    'values' => $item['values'],
                     'result' => $item['result'],
                     'check_result' => $item['check_result'],
                     'connection' => $item['connection'],
@@ -223,22 +245,26 @@ class ResetTransaction
             $actionArr = explode(' ', $subString);
             $action = $actionArr[0];
 
-            if ($bindings) {
-                $values = $bindings;
-                for ($i = 0; $i < count($bindings); $i++) {
-                    if (!is_null($bindings[$i])) {
-                        $query = Str::replaceFirst('?', "'%s'", $query);
-                    } else {
-                        $query = Str::replaceFirst('?', 'null', $query);
-                        unset($values[$i]);
+            if (!in_array($action, ['insert', 'update', 'delete'])) {
+                if ($bindings) {
+                    $values = $bindings;
+                    for ($i = 0; $i < count($bindings); $i++) {
+                        if (!is_null($bindings[$i])) {
+                            $query = Str::replaceFirst('?', "'%s'", $query);
+                        } else {
+                            $query = Str::replaceFirst('?', 'null', $query);
+                            unset($values[$i]);
+                        }
                     }
+                    $sql = str_replace(', ?', '', $query);
+                    $bindings = $values;
+                } else {
+                    $sql = str_replace("?", "'%s'", $query);
                 }
-                $sql = str_replace(', ?', '', $query);
-                $bindings = $values;
+                $completeSql = vsprintf($sql, $bindings);
             } else {
-                $sql = str_replace("?", "'%s'", $query);
+                $completeSql = $query;
             }
-            $completeSql = vsprintf($sql, $bindings);
 
             if (in_array($action, ['insert', 'update', 'delete', 'set', 'savepoint', 'rollback']) &&
                 !in_array('`telescope_entries`', $actionArr) &&
@@ -246,51 +272,32 @@ class ResetTransaction
                 $backupSql = $completeSql;
                 if ($action == 'insert') {
                     // if only queryBuilder insert or batch insert then return false
+                    preg_match("/insert into (.+) \((.+)\) values \((.+)\)/s", $backupSql, $match);
+                    $database = DB::connection()->getConfig('database');
+                    $table = $match[1];
+                    $columns = $match[2];
+                    $parameters = $match[3];
                     if (is_null($id)) {
                         $id = DB::connection()->getPdo()->lastInsertId();
                         // extract variables from sql
-                        preg_match("/insert into (.+) \((.+)\) values \((.+)\)/s", $backupSql, $match);
-                        $database = DB::connection()->getConfig('database');
-                        $table = $match[1];
-                        $columns = $match[2];
-                        $parameters = $match[3];
-
-                        $backupSql = function () use ($database, $table, $columns, $parameters, $id) {
-                            $columnItem = DB::selectOne('select column_name as `column_name` from information_schema.columns where table_schema = ? and table_name = ? and column_key="PRI"', [$database, trim($table, '`')]);
-                            $keyName = $columnItem->column_name;
-
-                            if (!empty($keyName) && $id != 0 && strpos($columns, "`{$keyName}`") === false) {
-                                $columns = "`{$keyName}`, " . $columns;
-                                $lineArr = explode('(', $parameters);
-                                foreach ($lineArr as $index => $line) {
-                                    $lineArr[$index] = "'{$id}', " . $line;
-                                    $id++;
-                                }
-                                $parameters = implode('(', $lineArr);
-                            }
-
-                            return "insert into $table ($columns) values ($parameters)";
-                        };
-                    } else {
-                        // extract variables from sql
-                        preg_match("/insert into (.+) \((.+)\) values \((.+)\)/s", $backupSql, $match);
-                        $table = $match[1];
-                        $columns = $match[2];
-                        $parameters = $match[3];
-
-                        if (!empty($keyName) && $id != 0 && strpos($columns, "`{$keyName}`") === false) {
-                            $columns = "`{$keyName}`, " . $columns;
-                            $parameters = "'{$id}', " . $parameters;
-                        }
-
-                        $backupSql = "insert into $table ($columns) values ($parameters)";
+                        $columnItem = DB::selectOne('select column_name as `column_name` from information_schema.columns where table_schema = ? and table_name = ? and column_key="PRI"', [$database, trim($table, '`')]);
+                        $keyName = $columnItem->column_name;
                     }
+
+                    if (!empty($keyName) && $id != 0 && strpos($columns, "`{$keyName}`") === false) {
+                        $columns = "`{$keyName}`, " . $columns;
+                        array_unshift($bindings, $id);
+                        $parameters = "?, " . $parameters;
+                    }
+
+                    $backupSql = "insert into $table ($columns) values ($parameters)";
                 }
 
                 $connectionName = DB::connection()->getConfig('connection_name');
                 $sqlItem = [
                     'transact_id' => $rtTransactId,
                     'sql' => $backupSql,
+                    'values' => json_encode($bindings, JSON_UNESCAPED_UNICODE),
                     'result' => $result,
                     'check_result' => (int)$checkResult,
                     'connection' => $connectionName
