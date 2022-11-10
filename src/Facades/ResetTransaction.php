@@ -2,6 +2,7 @@
 
 namespace Laravel\ResetTransaction\Facades;
 
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -264,6 +265,13 @@ class ResetTransaction
                 $completeSql = vsprintf($sql, $bindings);
             } else {
                 $completeSql = $query;
+                if ($bindings) {
+                    for ($i = 0; $i < count($bindings); $i++) {
+                        if (strtotime($bindings[$i])) {
+                            $bindings[$i] = Carbon::parse($bindings[$i])->format('Y-m-d H:i:s');
+                        }
+                    }
+                }
             }
 
             if (in_array($action, ['insert', 'update', 'delete', 'set', 'savepoint', 'rollback']) &&
