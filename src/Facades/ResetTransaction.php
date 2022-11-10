@@ -267,9 +267,7 @@ class ResetTransaction
                 $completeSql = $query;
                 if ($bindings) {
                     for ($i = 0; $i < count($bindings); $i++) {
-                        if (strtotime($bindings[$i])) {
-                            $bindings[$i] = Carbon::parse($bindings[$i])->format('Y-m-d H:i:s');
-                        }
+                        $bindings[$i] = strval($bindings[$i]);
                     }
                 }
             }
