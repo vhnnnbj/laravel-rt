@@ -267,7 +267,7 @@ class ResetTransaction
                 $completeSql = $query;
                 if ($bindings) {
                     for ($i = 0; $i < count($bindings); $i++) {
-                        $bindings[$i] = strval($bindings[$i]);
+                        $bindings[$i] = (string)$bindings[$i];
                     }
                 }
             }
