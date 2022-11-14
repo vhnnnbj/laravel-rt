@@ -287,10 +287,10 @@ class ResetTransaction
                         $id = DB::connection()->getPdo()->lastInsertId();
                         // extract variables from sql
                         $columnItem = DB::selectOne('select column_name as `column_name` from information_schema.columns where table_schema = ? and table_name = ? and column_key="PRI"', [$database, trim($table, '`')]);
-                        $keyName = $columnItem->column_name;
+                        $keyName = $columnItem?->column_name;
                     }
 
-                    if (!empty($keyName) && $id != 0 && strpos($columns, "`{$keyName}`") === false) {
+                    if ($keyName && !empty($keyName) && $id != 0 && strpos($columns, "`{$keyName}`") === false) {
                         $columns = "`{$keyName}`, " . $columns;
                         array_unshift($bindings, $id);
                         $parameters = "?, " . $parameters;
