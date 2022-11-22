@@ -43,7 +43,7 @@ class DistributeTransact
 
         $requestId = $request->header('rt-request-id');
         $transactId = $request->header('rt-transact-id');
-        $transactIdArr = explode('-', $transactId);
+        $transactIdArr = explode('-', $transactId ?: '');
         if ($transactId && $response->isSuccessful()) {
             RT::middlewareRollback();
             Redis::setex('RTCENTER:RESPONSE:' . $requestId, 5 * 60, $response->getContent());
